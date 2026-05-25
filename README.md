@@ -1,2 +1,2 @@
 #Repository1
-It randomly picks a student number. Good for recitation.
+Just for trying and learning.
