@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Number Picker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            /* Classic Pikachu/Pokemon Yellow */
+            background-color: #FFDE00;
+            background-image: radial-gradient(#E5C700 15%, transparent 16%), radial-gradient(#E5C700 15%, transparent 16%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .pokemon-title {
+            color: #FFDE00;
+            /* Classic Pokemon Blue stroke and shadow */
+            -webkit-text-stroke: 2px #2A75BB;
+            text-shadow: 4px 4px 0 #2A75BB, 6px 6px 0 #1D4C82;
+            letter-spacing: 2px;
+        }
+
+        .pokeball-btn {
+            background-color: #CC0000;
+            border: 4px solid #222224;
+            box-shadow: 0 6px 0 #8B0000;
+            transition: all 0.1s ease;
+        }
+        
+        .pokeball-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 #8B0000;
+        }
+
+        .pokeball-btn:disabled {
+            cursor: not-allowed;
+            filter: brightness(0.9);
+        }
+
+        /* Lightning bolt animation */
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .bolt {
+            animation: flash 1.5s infinite;
+        }
+        
+        .number-flash {
+            color: #CC0000;
+            transform: scale(1.15);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 md:p-10 relative overflow-hidden">
+
+    <!-- Lightning decoration (Moved to background corners) -->
+    <svg class="absolute top-8 left-8 w-16 h-16 md:w-32 md:h-32 text-white/40 bolt drop-shadow-md" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+    </svg>
+    <svg class="absolute bottom-8 right-8 w-16 h-16 md:w-32 md:h-32 text-white/40 bolt drop-shadow-md" style="animation-delay: 0.5s;" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+    </svg>
+
+    <!-- Main Content (Square Card) -->
+    <div class="flex flex-col items-center justify-between w-[95vmin] h-[95vmin] sm:w-[85vmin] sm:h-[85vmin] max-w-[800px] max-h-[800px] bg-white rounded-3xl md:rounded-[3rem] border-8 border-[#2A75BB] shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-10 px-6 pt-3 pb-10 md:px-10 md:pt-6 md:pb-16 relative">
+        
+        <div class="flex flex-col items-center w-full">
+            <!-- Title -->
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-black text-center pokemon-title uppercase leading-tight drop-shadow-md">
+                Random<br>Picker
+            </h1>
+
+            <!-- Range text -->
+            <p class="mt-2 sm:mt-4 text-[#2A75BB] font-bold text-sm sm:text-lg md:text-xl tracking-widest uppercase bg-blue-50 px-6 py-2 rounded-full border-2 border-[#2A75BB] shadow-sm">
+                Range: 1 - 30
+            </p>
+        </div>
+        
+        <!-- Number Display Container -->
+        <div class="relative flex-1 flex items-center justify-center w-full my-4">
+            <!-- Outer casing -->
+            <div class="bg-gray-200 p-3 sm:p-5 rounded-2xl sm:rounded-3xl border-4 sm:border-8 border-[#222224] shadow-[0_10px_20px_rgba(0,0,0,0.2)] w-[40vmin] h-[40vmin] sm:w-[35vmin] sm:h-[35vmin] max-w-[350px] max-h-[350px] flex items-center justify-center">
+                <!-- Inner screen -->
+                <div id="screen" class="w-full h-full bg-[#e0f0e3] rounded-xl sm:rounded-2xl border-4 sm:border-8 border-gray-400 flex items-center justify-center shadow-inner overflow-hidden transition-all duration-200">
+                    <span id="numberDisplay" class="font-black text-[12vmin] sm:text-[10vmin] md:text-[8rem] text-[#222224] transition-all duration-300 leading-none select-none drop-shadow-md">?</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Button -->
+        <button id="pickBtn" class="pokeball-btn shrink-0 w-full md:w-5/6 text-white font-black py-4 sm:py-6 px-4 sm:px-8 rounded-full text-xl sm:text-3xl md:text-4xl uppercase tracking-wider relative overflow-hidden group shadow-[0_10px_20px_rgba(204,0,0,0.4)]">
+            <span class="relative z-10 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] flex items-center justify-center gap-2 sm:gap-4">
+                <span>I Choose You!</span>
+            </span>
+            <!-- Button shine effect -->
+            <div class="absolute top-0 -left-full w-1/2 h-full bg-white/20 skew-x-12 group-hover:animate-[shine_0.5s_ease-in-out]"></div>
+        </button>
+
+        <style>
+            @keyframes shine {
+                100% { left: 200%; }
+            }
+        </style>
+    </div>
+
+    <script>
+        const btn = document.getElementById('pickBtn');
+        const display = document.getElementById('numberDisplay');
+        const screen = document.getElementById('screen');
+        
+        btn.addEventListener('click', () => {
+            // Prevent multiple clicks while animating
+            if (btn.disabled) return;
+            
+            btn.disabled = true;
+            display.classList.remove('number-flash');
+            
+            let counter = 0;
+            const totalSpins = 25; // Number of random numbers to cycle through
+            
+            // Rapidly change the number to build suspense
+            const interval = setInterval(() => {
+                const tempNumber = Math.floor(Math.random() * 30) + 1;
+                display.innerText = tempNumber;
+                counter++;
+                
+                if (counter >= totalSpins) {
+                    clearInterval(interval);
+                    
+                    // Generate final number
+                    const finalNumber = Math.floor(Math.random() * 30) + 1;
+                    display.innerText = finalNumber;
+                    
+                    // Apply highlight effects
+                    display.classList.add('number-flash');
+                    
+                    setTimeout(() => {
+                        display.classList.remove('number-flash');
+                        btn.disabled = false; // Re-enable button
+                    }, 800);
+                }
+            }, 60); // Speed of the number cycle (ms)
+        });
+    </script>
+</body>
+</html>
